@@ -55,6 +55,8 @@ GOAT state, and are intentionally excluded from this repository.
 ## Validation
 
 ```bash
+python3 -m pip install -r requirements-dev.txt
+
 python3 -m pytest -q \
   skills/full-swarm/scripts/test_*.py \
   skills/claude-full-swarm/scripts/test_*.py
