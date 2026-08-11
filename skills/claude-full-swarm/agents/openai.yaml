@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Full Swarm Mode"
+  short_description: "Claude-heavy full swarm default mode"
+  default_prompt: "Use $claude-full-swarm or $cfsm to run the default Claude-heavy full swarm mode."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Full Swarm"
+  short_description: "Best-model latest-AI full swarm"
+  default_prompt: "Use $full-swarm to run a highest-performance swarm that routes each role by the model league and tests newest usable models as challenger lanes."

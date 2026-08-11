@@ -1,0 +1,4 @@
+interface:
+  display_name: "GOAT Stack"
+  short_description: "Propose an owner-governed model stack"
+  default_prompt: "Use $gstack to propose and explain an evidence-aware execution stack."

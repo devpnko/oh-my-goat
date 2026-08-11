@@ -1,0 +1,25 @@
+{
+  "name": "oh-my-goat",
+  "version": "0.1.0",
+  "description": "Owner-governed execution assurance and evidence-aware model routing.",
+  "author": {
+    "name": "devpnko",
+    "url": "https://github.com/devpnko"
+  },
+  "homepage": "https://github.com/devpnko/oh-my-goat",
+  "repository": "https://github.com/devpnko/oh-my-goat",
+  "keywords": ["goat", "stacker", "model-routing", "execution-assurance"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Oh My GOAT",
+    "shortDescription": "Governed, evidence-aware model routing.",
+    "longDescription": "Route model stacks by role, evidence, runtime health, and quota without confusing a routing proposal with execution Authority.",
+    "developerName": "devpnko",
+    "category": "Productivity",
+    "capabilities": ["Model routing", "Evidence planning"],
+    "defaultPrompt": [
+      "Choose an evidence-aware model stack for this task.",
+      "Explain the proposed stack and its authority boundary."
+    ]
+  }
+}

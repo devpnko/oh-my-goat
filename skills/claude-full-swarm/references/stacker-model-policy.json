@@ -1,0 +1,115 @@
+{
+  "schema_version": "stacker.model_selection_policy.v1",
+  "strategy": "highest_suitable_first",
+  "champion_score_minimum": 88,
+  "default_effort": "max",
+  "frontier_intake": {
+    "required_risk_classes": ["high", "critical"],
+    "baseline_comparison_required": true,
+    "max_newest_candidates_per_role_per_run": 1,
+    "coalesce_same_candidate_across_roles": true,
+    "completion_requires": ["actual_model_attestation", "comparable_role_score"]
+  },
+  "effort_policy": {
+    "default_ceiling": "max",
+    "ultra_requires_explicit_opt_in": true,
+    "ultra_requires_healthy_runtime": true,
+    "infrastructure_failure_is_not_model_quality": true
+  },
+  "premium_routing": {
+    "fable": {
+      "strategy": "quota_paced_high_leverage",
+      "max_snapshot_age_seconds": 900,
+      "target_utilization_percentage": 95,
+      "pace_tolerance_percentage": 5,
+      "reserve_percentage": 5,
+      "role_tiers": {
+        "exact": ["named_advisor", "fable_final"],
+        "core": ["intent_gap", "strategy_planner", "correction_architect"],
+        "expanded": ["ux_product", "orchestrator"]
+      },
+      "excluded_work": [
+        "deterministic_hash_or_schema_check",
+        "bulk_retrieval_or_transcript_compaction",
+        "mechanical_implementation_loop",
+        "duplicate_lane_without_distinct_judgment"
+      ]
+    }
+  },
+  "families": {
+    "fable": {
+      "selector": "fable",
+      "actual_model_pattern": "claude-fable-.+",
+      "model_patterns": ["(^|[-_ ])fable([0-9._ -]|$)"],
+      "premium_opt_in": true
+    },
+    "opus": {
+      "selector": "opus",
+      "actual_model_pattern": "claude-opus-.+",
+      "model_patterns": ["(^|[-_ ])opus([0-9._ -]|$)"],
+      "premium_opt_in": false
+    },
+    "sonnet": {
+      "selector": "sonnet",
+      "actual_model_pattern": "claude-sonnet-.+",
+      "model_patterns": ["(^|[-_ ])sonnet([0-9._ -]|$)"],
+      "premium_opt_in": false
+    }
+  },
+  "roles": {
+    "semantic": {
+      "league_terms": ["semantic", "architecture", "architect", "skeptic", "product"],
+      "family_preference": ["opus", "sonnet"]
+    },
+    "mechanical": {
+      "league_terms": ["mechanical", "verifier", "verification", "test", "implementation"],
+      "family_preference": ["opus", "sonnet"]
+    },
+    "atomicity": {
+      "league_terms": ["atomicity", "database", "db", "ledger", "security", "architecture"],
+      "family_preference": ["opus", "sonnet"]
+    },
+    "architect_skeptic": {
+      "league_terms": ["architect", "architecture", "skeptic", "security", "product"],
+      "family_preference": ["opus", "sonnet"]
+    },
+    "verifier": {
+      "league_terms": ["verifier", "verification", "test", "evidence"],
+      "family_preference": ["opus", "sonnet"]
+    },
+    "summarizer": {
+      "league_terms": ["summarizer", "summary", "synthesis"],
+      "family_preference": ["sonnet", "opus"]
+    },
+    "named_advisor": {
+      "league_terms": ["advisor", "architect", "strategy", "fable"],
+      "family_preference": ["fable"],
+      "exact_family_required": true
+    },
+    "fable_final": {
+      "league_terms": ["fable", "final", "synthesis", "review", "counterexample"],
+      "family_preference": ["fable"],
+      "exact_family_required": true
+    },
+    "intent_gap": {
+      "league_terms": ["intent", "goal", "gap", "success contract", "strategy"],
+      "family_preference": ["fable", "opus", "sonnet"]
+    },
+    "strategy_planner": {
+      "league_terms": ["strategy", "planning", "plan", "roadmap", "architecture"],
+      "family_preference": ["fable", "opus", "sonnet"]
+    },
+    "correction_architect": {
+      "league_terms": ["correction", "architecture", "root cause", "counterexample", "recovery"],
+      "family_preference": ["fable", "opus", "sonnet"]
+    },
+    "ux_product": {
+      "league_terms": ["ux", "product", "workflow", "interaction", "user"],
+      "family_preference": ["fable", "opus", "sonnet"]
+    },
+    "orchestrator": {
+      "league_terms": ["orchestrator", "coordination", "workflow", "planning", "synthesis"],
+      "family_preference": ["fable", "opus", "sonnet"]
+    }
+  }
+}
