@@ -30,6 +30,7 @@ VERIFIER_RECEIPT_SCHEMA = "stacker.compact_verifier_receipt.v3"
 BOUND_LAUNCHER_RECEIPT_SCHEMA = "stacker.bound_launcher_execution_receipt.v3"
 LAUNCHER_BINDING_CONTRACT_SCHEMA = "stacker.launcher_binding_contract.v1"
 SPEC_SCHEMA = "stacker.review_graph_spec.v1"
+SYSTEM_SHELL_ALIAS = Path("/bin/sh")
 
 PROVIDER_TERMINAL_MARKERS = (
     (b"usage limit", "PROVIDER_USAGE_LIMIT"),
@@ -181,6 +182,24 @@ ALLOWED_SPEC_FIELDS = {
 
 class ReviewGraphError(RuntimeError):
     """The proposed review inputs cannot be bound safely."""
+
+
+def system_shell_path() -> Path:
+    """Return a resolved, root-owned, non-writable POSIX shell executable."""
+    try:
+        resolved = SYSTEM_SHELL_ALIAS.resolve(strict=True)
+        observed = os.lstat(resolved)
+    except OSError as exc:
+        raise ReviewGraphError("system_shell_unavailable") from exc
+    permissions = stat.S_IMODE(observed.st_mode)
+    if (
+        not resolved.is_absolute()
+        or not stat.S_ISREG(observed.st_mode)
+        or observed.st_uid != 0
+        or permissions & 0o022
+    ):
+        raise ReviewGraphError(f"system_shell_not_trusted:{resolved}")
+    return resolved
 
 
 def provider_terminal_reason(raw: bytes) -> str | None:
@@ -1074,7 +1093,7 @@ def build_review_bundle(
             raise ReviewGraphError("compact_verifier_receipt_is_not_pass")
         execution_transport = receipt_content.get("execution_transport")
         actual_argv = receipt_content.get("argv")
-        shell_path = Path("/bin/sh")
+        shell_path = system_shell_path()
         current_launcher_identity = descriptor_identity(os.lstat(launcher_path))
         private_capture = (
             execution_transport.get("private_capture")
@@ -2164,7 +2183,7 @@ def capture_compact_verifier_receipt(
         output_dir=output_dir,
         label="exact-verifier",
     )
-    shell_path = Path("/bin/sh")
+    shell_path = system_shell_path()
     actual_argv = [
         str(shell_path),
         f"/dev/fd/{launcher_fd}",
@@ -2311,7 +2330,7 @@ def capture_bound_launcher_receipt(
         output_dir=output_dir,
         label=label,
     )
-    shell_path = Path("/bin/sh")
+    shell_path = system_shell_path()
     actual_argv = [
         str(shell_path),
         f"/dev/fd/{launcher_fd}",

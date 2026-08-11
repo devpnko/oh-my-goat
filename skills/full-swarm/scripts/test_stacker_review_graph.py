@@ -3,9 +3,10 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-from pathlib import Path
+import stat
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 
@@ -23,6 +24,15 @@ def write_canonical(path: Path, value: object) -> str:
 
 
 class ReviewGraphTest(unittest.TestCase):
+    def test_system_shell_resolves_to_trusted_regular_executable(self):
+        shell_path = review.system_shell_path()
+        observed = os.lstat(shell_path)
+        self.assertTrue(shell_path.is_absolute())
+        self.assertFalse(shell_path.is_symlink())
+        self.assertTrue(stat.S_ISREG(observed.st_mode))
+        self.assertEqual(observed.st_uid, 0)
+        self.assertEqual(stat.S_IMODE(observed.st_mode) & 0o022, 0)
+
     def subject(self, artifact_a: Path, artifact_b: Path) -> dict:
         binding_a = {
             "path": str(artifact_a),
@@ -185,6 +195,7 @@ class ReviewGraphTest(unittest.TestCase):
     ) -> Path:
         launcher = root / "verifier.sh"
         launcher.write_bytes(b"#!/bin/sh\n")
+        shell_path = review.system_shell_path()
         stdout_path = root / "verifier.stdout.json"
         stderr_path = root / "verifier.stderr"
         observed_result = result or review.expected_verifier_result(required)
@@ -202,11 +213,11 @@ class ReviewGraphTest(unittest.TestCase):
             "subject": review.exact_file_binding(subject_path),
             "launcher": review.exact_file_binding(launcher),
             "logical_argv": [str(launcher), str(subject_path), required],
-            "argv": ["/bin/sh", "/dev/fd/9", str(subject_path), required],
+            "argv": [str(shell_path), "/dev/fd/9", str(subject_path), required],
             "execution_transport": {
                 "kind": "CONTENT_BOUND_SOURCE_TO_UNLINKED_PRIVATE_CAPTURE_TO_ROOT_OWNED_SHELL",
                 "producer": review.exact_file_binding(SCRIPT),
-                "shell": review.exact_file_binding(Path("/bin/sh")),
+                "shell": review.exact_file_binding(shell_path),
                 "launcher": review.exact_file_binding(launcher),
                 "source_descriptor_identity": launcher_identity,
                 "source_descriptor_content_sha256": review.digest(launcher.read_bytes()),
